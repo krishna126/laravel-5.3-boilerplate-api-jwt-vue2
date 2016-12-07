@@ -22,11 +22,18 @@ class UserRoleSeeder extends Seeder
             DB::statement("TRUNCATE TABLE " . config('access.assigned_roles_table') . " CASCADE");
         }
 
-        //Attach admin role to admin user
-        config('auth.model')::find(1)->roles()->sync([1]);
-
-        //Attach user role to general user
-        config('auth.model')::find(2)->roles()->sync([2]);
+        try {
+            if(config('auth.model') && !empty(config('auth.model'))){
+                $userModel = __NAMESPACE__ . '\\'. config('auth.model');
+                $user = new $userModel;
+                $user::find(1)->roles()->sync([1]); //Attach admin role to admin user
+                $user::find(2)->roles()->sync([2]); //Attach user role to general user
+            }else{
+                throw new Exception('In config role model could not be empty.');
+            }
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
 
         if (env('DB_CONNECTION') == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
