@@ -38,8 +38,17 @@ class RoleTableSeeder extends Seeder
                 'updated_at'=>date('Y-m-d H:i:s'),
             ],
         ];
-
-        config('access.role')::insert($roles);
+        try {
+            if(config('access.role') && !empty(config('access.role'))){
+                $roleModel = __NAMESPACE__ . '\\'. config('access.role');
+                $role = new $roleModel;
+                $role::insert($roles);
+            }else{
+              throw new Exception('In config role model could not be empty.');
+            }
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
 
 
         if (env('DB_CONNECTION') == 'mysql') {
